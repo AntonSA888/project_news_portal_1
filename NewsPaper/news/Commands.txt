@@ -1,0 +1,177 @@
+python manage.py shell
+
+from news.resources import *
+from news.models import *
+from django.contrib.auth.models import User
+from django.db.models import Sum
+
+
+# 1. Создать двух пользователей (с помощью метода User.objects.create_user('username')).
+User.objects.create_user('Пётр Петрович')
+User.objects.create_user('Иванов Иван Иванович')
+
+
+
+# 2. Создать два объекта модели Author, связанные с пользователями.
+user = User.objects.get(username = 'Пётр Петрович')
+Author.objects.create(user=user)
+
+user1 = User.objects.get(username = 'Иванов Иван Иванович')
+Author.objects.create(user=user1)
+
+
+
+# 3. Добавить 4 категории в модель Category.
+Category.objects.create(category = 'sport')
+Category.objects.create(category = 'policy')
+Category.objects.create(category = 'education')
+Category.objects.create(category = 'other')
+
+
+
+# 4. Добавить 2 статьи и 1 новость.
+user = User.objects.get(username = 'Пётр Петрович')
+autor1 = Author.objects.get(user=user)
+Post.objects.create(author = autor1,
+                    type = article,
+                    title = 'Сложные проценты',
+                    post_text = 'Капитализация процентов — причисление процентов к сумме вклада, позволяет в дальнейшем осуществлять начисление процентов на проценты путем выполнения двойной операции — выплата процентов и пополнение. Начисление процентов на проценты, используемое в некоторых видах банковских вкладов, или, при наличии долга, проценты, которые включаются в сумму основного долга, и на них также начисляются проценты. То же, что и сложный процент. Проценты по вкладу с капитализацией могут начисляться ежедневно, ежемесячно, ежеквартально и ежегодно. Если их не выплачивают, то прибавляют к сумме вклада. И в следующем периоде проценты будут начислены уже на большую сумму.')
+
+user = User.objects.get(username = 'Иванов Иван Иванович')
+autor1 = Author.objects.get(user=user)
+Post.objects.create(author = autor1,
+                    type = article,
+                    title = 'Зимнее утро',
+                    post_text = 'Мороз и солнце; день чудесный! Еще ты дремлешь, друг прелестный- Пора, красавица, проснись: Открой сомкнуты негой взоры Навстречу северной Авроры, Звездою севера явись!')
+
+user = User.objects.get(username = 'Иванов Иван Иванович')
+autor1 = Author.objects.get(user=user)
+Post.objects.create(author = autor1,
+                    type = news,
+                    title = 'Домашняя кошка стала мамой рысёнку',
+                    post_text = 'Как сообщила пресс-служба Новосибирского зоопарка, домашняя кошка взяла на себя заботы о рысёнке. В конце мая рыжая рысь Сара стала мамой – у неё родился один малыш. Однако самка отказалась кормить детёныша. Причины такого поведения могут быть разными. Одна из них – это проблемы со здоровьем у самки или её малыша.')
+
+
+
+# 5. Присвоить им категории (как минимум в одной статье/новости должно быть не меньше 2 категорий).
+c3 = Category.objects.get(category = 'education')
+c4 = Category.objects.get(category = 'other')
+
+p1 = Post.objects.get(title = 'Сложные проценты')
+p1.category.add(c3)
+p1.save()
+
+p2 = Post.objects.get(title = 'Зимнее утро')
+p2.category.add(c3, c4)
+p2.save()
+
+p3 = Post.objects.get(title = 'Домашняя кошка стала мамой рысёнку')
+p3.category.add(c4)
+p3.save()
+
+
+
+# 6. Создать как минимум 4 комментария к разным объектам модели Post (в каждом объекте должен быть как минимум один комментарий).
+
+p1 = Post.objects.get(title = 'Сложные проценты')
+p2 = Post.objects.get(title = 'Зимнее утро')
+p3 = Post.objects.get(title = 'Домашняя кошка стала мамой рысёнку')
+
+user1 = User.objects.get(username = 'Пётр Петрович')
+user2 = User.objects.get(username = 'Иванов Иван Иванович')
+
+Comment.objects.create(post = p1,
+                       user = user2,
+                       comment_text = 'спс')
+
+Comment.objects.create(post = p1,
+                       user = user1,
+                       comment_text = 'Если пост вам понравился, поддержите автора лайком!')
+
+Comment.objects.create(post = p2,
+                       user = user1,
+                       comment_text = 'Классика')
+
+Comment.objects.create(post = p3,
+                       user = user1,
+                       comment_text = 'Милота))')
+
+
+
+# 7. Применяя функции like() и dislike() к статьям/новостям и комментариям, скорректировать рейтинги этих объектов.
+p1 = Post.objects.get(title = 'Сложные проценты')
+p2 = Post.objects.get(title = 'Зимнее утро')
+p3 = Post.objects.get(title = 'Домашняя кошка стала мамой рысёнку')
+
+p1.like()
+p1.like()
+p1.like()
+p1.dislike()
+p1.dislike()
+p1.save()
+
+p2.like()
+p2.like()
+p2.like()
+p2.dislike()
+p2.save()
+
+p3.like()
+p3.like()
+p3.like()
+p3.like()
+p3.dislike()
+p3.save()
+
+
+
+# 8. Обновить рейтинги пользователей.
+
+user1 = User.objects.get(username = 'Пётр Петрович')
+user2 = User.objects.get(username = 'Иванов Иван Иванович')
+
+a1 = Author.objects.get(user = user1)
+a1.update_rating()
+
+
+c3 = Category.objects.get(category = 'education')
+c4 = Category.objects.get(category = 'other')
+
+p1 = Post.objects.get(title = 'Сложные проценты')
+p1.category.add(c3)
+p1.save()
+
+
+# 9. Вывести username и рейтинг лучшего пользователя (применяя сортировку и возвращая поля первого объекта).
+
+a1 = Author.objects.get(id = 1)
+a2 = Author.objects.get(id = 2)
+
+a1.author_rating = 1
+a1.save()
+
+a2.author_rating = 3
+a2.save()
+
+user = User.objects.get(username = 'Пётр Петрович')
+
+Author.objects.all().order_by('-author_rating').values('user','author_rating')
+Author.objects.all().order_by('-author_rating').values('User.objects.get(id = user).username','author_rating')
+
+User.objects.get(id = 1).username
+User.objects.get(id = user).username
+
+
+# 10. Вывести дату добавления, username автора, рейтинг, заголовок и превью лучшей статьи, основываясь на лайках/дислайках к этой статье.
+# 11. Вывести все комментарии (дата, пользователь, рейтинг, текст) к этой статье.
+
+
+
+news = 'NW'
+article = 'AR'
+
+TYPES = [
+    (news, 'Новость'),
+    (article, 'Статья'),
+]
+
