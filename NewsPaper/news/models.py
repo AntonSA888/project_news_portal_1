@@ -9,10 +9,16 @@ class Author(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
 
     def update_rating(self):
-        sum_post_rating = Post.objects.filter(author=self).aggregate(Sum('post_rating')) * 3
-        sum_author_comment_rating = Comment.objects.filter(user=self).aggregate(Sum('comment_rating'))
-        sum_comment_rating = Comment.objects.filter(post=Post.author(self)).aggregate(Sum('comment_rating'))
-        self.author_rating = sum_post_rating + sum_author_comment_rating + sum_comment_rating
+        sum_post_rating = Post.objects.filter(author=self).aggregate(Sum('post_rating'))
+        sum_author_comment_rating = Comment.objects.filter(user=self.user).aggregate(Sum('comment_rating'))
+        sum_comment_rating = Comment.objects.filter(post__in=Post.objects.filter(author=self)).aggregate(Sum('comment_rating'))
+        self.author_rating = sum_post_rating['post_rating__sum'] * 3 + \
+                             sum_author_comment_rating['comment_rating__sum'] + \
+                             sum_comment_rating['comment_rating__sum']
+        # print(Post.objects.filter(author=self).aggregate(Sum('post_rating')))
+        # print(Comment.objects.filter(user=self.user).aggregate(Sum('comment_rating')))
+        # print(Comment.objects.filter(post__in=Post.objects.filter(author=self)).aggregate(Sum('comment_rating')))
+        # print(sum_post_rating['post_rating__sum'] * 3 + sum_author_comment_rating + sum_comment_rating)
 
 
 class Category(models.Model):

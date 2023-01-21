@@ -7,12 +7,14 @@ from django.db.models import Sum
 
 
 # 1. Создать двух пользователей (с помощью метода User.objects.create_user('username')).
+
 User.objects.create_user('Пётр Петрович')
 User.objects.create_user('Иванов Иван Иванович')
 
 
 
 # 2. Создать два объекта модели Author, связанные с пользователями.
+
 user = User.objects.get(username = 'Пётр Петрович')
 Author.objects.create(user=user)
 
@@ -22,6 +24,7 @@ Author.objects.create(user=user1)
 
 
 # 3. Добавить 4 категории в модель Category.
+
 Category.objects.create(category = 'sport')
 Category.objects.create(category = 'policy')
 Category.objects.create(category = 'education')
@@ -30,6 +33,7 @@ Category.objects.create(category = 'other')
 
 
 # 4. Добавить 2 статьи и 1 новость.
+
 user = User.objects.get(username = 'Пётр Петрович')
 autor1 = Author.objects.get(user=user)
 Post.objects.create(author = autor1,
@@ -54,6 +58,7 @@ Post.objects.create(author = autor1,
 
 
 # 5. Присвоить им категории (как минимум в одной статье/новости должно быть не меньше 2 категорий).
+
 c3 = Category.objects.get(category = 'education')
 c4 = Category.objects.get(category = 'other')
 
@@ -99,6 +104,7 @@ Comment.objects.create(post = p3,
 
 
 # 7. Применяя функции like() и dislike() к статьям/новостям и комментариям, скорректировать рейтинги этих объектов.
+
 p1 = Post.objects.get(title = 'Сложные проценты')
 p2 = Post.objects.get(title = 'Зимнее утро')
 p3 = Post.objects.get(title = 'Домашняя кошка стала мамой рысёнку')
@@ -132,37 +138,44 @@ user2 = User.objects.get(username = 'Иванов Иван Иванович')
 
 a1 = Author.objects.get(user = user1)
 a1.update_rating()
+a1.save()
 
+a2 = Author.objects.get(user = user2)
+a2.update_rating()
+a2.save()
 
-c3 = Category.objects.get(category = 'education')
-c4 = Category.objects.get(category = 'other')
-
-p1 = Post.objects.get(title = 'Сложные проценты')
-p1.category.add(c3)
-p1.save()
 
 
 # 9. Вывести username и рейтинг лучшего пользователя (применяя сортировку и возвращая поля первого объекта).
 
-a1 = Author.objects.get(id = 1)
-a2 = Author.objects.get(id = 2)
-
-a1.author_rating = 1
-a1.save()
-
-a2.author_rating = 3
-a2.save()
-
-user = User.objects.get(username = 'Пётр Петрович')
-
-Author.objects.all().order_by('-author_rating').values('user','author_rating')
-Author.objects.all().order_by('-author_rating').values('User.objects.get(id = user).username','author_rating')
-
-User.objects.get(id = 1).username
-User.objects.get(id = user).username
+Author.objects.all().order_by('-author_rating').values('user__username','author_rating')[:1]
 
 
-# 10. Вывести дату добавления, username автора, рейтинг, заголовок и превью лучшей статьи, основываясь на лайках/дислайках к этой статье.
+
+# 10. Вывести дату добавления, username автора, рейтинг, заголовок и превью лучшей статьи,
+ основываясь на лайках/дислайках к этой статье.
+
+post1 = Post.objects.all().order_by('-post_rating').first()
+
+Post.objects.all().order_by('-post_rating').values('post_datetime','author__user__username','post_rating','title').first()
+post1.preview()
+
+
+
+# 11. Вывести все комментарии (дата, пользователь, рейтинг, текст) к этой статье.
+
+post1 = Post.objects.all().order_by('-post_rating').first()
+Comment.objects.filter(post = post1).values('comment_datetime','user__username','comment_rating','comment_text')
+
+
+
+
+
+
+
+
+
+
 # 11. Вывести все комментарии (дата, пользователь, рейтинг, текст) к этой статье.
 
 
