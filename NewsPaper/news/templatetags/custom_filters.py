@@ -1,6 +1,6 @@
 from django import template
 
-censor = template.Library()
+register = template.Library()
 
 
 def lower(text):
@@ -35,9 +35,9 @@ def censor1(string):
     return ' '.join(list_)
 
 
-@censor.filter()
-def mycenzor(value): # К этому названию нужно обращаться из шаблонов
-    return {value}
+@register.filter()
+def mycensor(value): # К этому названию нужно обращаться из шаблонов
+    return censor1(value)
 
 
 
